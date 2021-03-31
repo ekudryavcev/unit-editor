@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="icon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="An utility for generating basic XML for a new Age of Empires 3 unit"
+    />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>Unit Editor</title>
+    <link rel="stylesheet" href="static/css/bootstrap.min.css"> </link>
+    <script type="text/javascript" src="static/js/jquery-3.5.1.slim.min.js"> </script>
+    <script type="text/javascript" src="static/js/popper.min.js"> </script>
+    <script type="text/javascript" src="static/js/bootstrap.min.js"> </script>
+
+    <script src="static/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="static/lib/codemirror.css">
+    <script src="static/js/xml/xml.js"></script>
+    <script src="static/js/yaml/yaml.js"></script>
+    <script src="static/js/javascript/javascript.js"></script>
+    
+    <script src="static/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+    <link rel="stylesheet" href="static/css/styles.css"> </link>
+  </head>
+  <body class="theme-ayu-dark">
+    <div id="loading-container">
+        <div id="loading-animation">
+            <div class="loader" id="loader1"></div>
+            <div class="loader" id="loader2"></div>
+            <div class="loader" id="loader3"></div>
+            <div class="loader" id="loader4"></div>
+            <span>LOADING</span>
+        </div>
+    </div>
+    <div id="unit" style="display: none;">
+        <h2>
+            <span id="unit-main-name"></span>
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="4">
+                        <h5>
+                            <span class="warning-sign id-warning" id="unit-id-warning">
+                                <span class="tooltip-container">⚠</span>
+                                <span class="warning-tooltip">This ID is already occupied by another unit.</span>
+                            </span>
+                            <span>
+                                <span class="comment">#</span><input id="unit-id" class="comment" type="number">
+                            </span>
+                            <span class="warning-sign name-warning" id="unit-name-warning">
+                                <span class="tooltip-container">⚠</span>
+                                <span class="warning-tooltip">This name is already used by another unit.</span>
+                            </span>
+                            <span>
+                                <input id="unit-name">
+                            </span>
+                        </h5>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tag">Displayed name:</td>
+                    <td class="warning-sign" id="unit-display-name-warning">
+                        <span class="tooltip-container">⚠</span>
+                        <span class="warning-tooltip"></span>
+                    </td>
+                    <td><input type="number" class="numeric string-id" id="unit-display-name-id"></td>
+                    <td><input id="unit-display-name" class="short-text"></td>
+                </tr>
+                <tr>
+                    <td class="tag">Editor name:</td>
+                    <td class="warning-sign" id="unit-editor-name-warning">
+                        <span class="tooltip-container">⚠</span>
+                        <span class="warning-tooltip"></span>
+                    </td>
+                    <td><input type="number" class="numeric string-id" id="unit-editor-name-id"></td>
+                    <td><input id="unit-editor-name" class="short-text"></td>
+                </tr>
+                <tr>
+                    <td class="tag">Rollover:</td>
+                    <td class="warning-sign" id="unit-rollover-warning">
+                        <span class="tooltip-container">⚠</span>
+                        <span class="warning-tooltip"></span>
+                    </td>
+                    <td><input type="number" class="numeric string-id" id="unit-rollover-id"></td>
+                    <td><input id="unit-rollover" class="long-text"></td>
+                </tr>
+                <tr>
+                    <td class="tag">Short rollover:</td>
+                    <td class="warning-sign" id="unit-shortrollover-warning">
+                        <span class="tooltip-container">⚠</span>
+                        <span class="warning-tooltip"></span>
+                    </td>
+                    <td><input type="number" class="numeric string-id" id="unit-shortrollover-id"></td>
+                    <td><input id="unit-shortrollover" class="long-text"></td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="6">
+                        <h5>
+                            <span class="comment">Cost:</span>
+                            <span id="unit-total-cost"></span>
+                            <span class="comment" style="font-size: .75em; margin-left: 2em; position: relative;">(adjusted for export and population)
+                                <span class="tooltip-container"> ⓘ</span>
+                                <span class="info-tooltip">
+                                    The total cost is calculated as a summ of all resource costs, with export counted as 37% more valuable, and 10 resources per population point
+                                </span>
+                            </span>
+                        </h5>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="2">
+                        <span style="width: auto;">
+                            <span class="tag">Cost efficiency:</span>
+                            <span id="unit-efficiency" class="numeric" style="width: auto; padding: 0.5em;"></span>
+                            <span class="comment" style="position: relative;">
+                                <span class="tooltip-container"> ⓘ</span>
+                                <span class="info-tooltip">
+                                    <p>An index showing the ratio between the unit's total cost and its adjusted attack and hitpoints, LOS and speed</p>
+                                    Note that this index is not a substitute for in-depth analysis and in-game testing, and cannot guarantee a balanced unit
+                                </span>
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="unit-food-tag" class="tag cost-tag">Food:</td>
+                    <td id="unit-food"><span class="food-icon">🥩 </span><input class="numeric cost" id="unit-food-cost" type="number" step="5" min="0"></td>
+                    <td>  </td>
+                    <td id="unit-train-time-tag" class="tag">Train time:</td>
+                    <td><span>🕔 </span><input class="numeric" id="unit-train-time" type="number" min="0"></td>
+                </tr>
+                <tr>
+                    <td id="unit-wood-tag" class="tag cost-tag">Wood:</td>
+                    <td id="unit-wood"><span class="wood-icon">🌳 </span><input class="numeric cost" id="unit-wood-cost" type="number" step="5" min="0"></td>
+                    <td>  </td>
+                    <td id="unit-population-tag" class="tag">Population:</td>
+                    <td><span>👥 </span><input class="numeric" id="unit-population" type="number" min="0"></td>
+                </tr>
+                <tr>
+                    <td id="unit-gold-tag" class="tag cost-tag">Gold:</td>
+                    <td id="unit-gold"><span class="gold-icon">💰 </span><input class="numeric cost" id="unit-gold-cost" type="number" step="5" min="0"></td>
+                    <td>  </td>
+                    <td id="unit-limit-tag" class="tag">Build limit:</td>
+                    <td><input class="numeric" id="unit-limit" type="number" min="0"></td>
+                </tr>
+                <tr>
+                    <td id="unit-trade-tag" class="tag cost-tag">Export:</td>
+                    <td id="unit-trade"><span class="export-icon">🌿 </span><input class="numeric cost" id="unit-trade-cost" type="number" step="5" min="0"></td>
+                    <td>  </td>
+                    <td id="unit-age-tag" class="tag">Age:</td>
+                    <td>
+                        <select class="numeric" id="unit-age">
+                            <option value='0'>I</option>
+                            <option value='1'>II</option>
+                            <option value='2'>III</option>
+                            <option value='3'>IV</option>
+                            <option value='4'>V</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr class="divider">
+                    <td>  </td>
+                </tr>
+                <tr>
+                    <td class="tag" colspan="2">
+                        <h5>
+                            <span class="comment">HP:</span>
+                            <input id="unit-adjusted-hp" type="number" min="5" step="5">
+                            <span class="comment" style="font-size: .75em; position: relative;">(adjusted for armor)
+                                <span class="tooltip-container"> ⓘ</span>
+                                <span class="info-tooltip">
+                                    Adjusted HP considers the decrease in damage the unit takes thanks to its armor.
+                                </span>
+                            </span>
+                        </h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="unit-hp-tag" class="tag">HP:</td>
+                    <td>
+                        <input id="unit-hp" class="numeric" type="number" min="5" step="5">
+                    </td>
+                    <td>  </td>
+                    <td id="unit-armor-tag" class="tag">Armor:</td>
+                    <td>
+                        <input id="unit-armor" class="numeric" type="number" min="0.0" max="1.0" step="0.05" style="transform: translateY(-0.05rem);">
+                        <select id="unit-armor-type" class="comment">
+                            <option>Ranged</option>
+                            <option>Hand</option>
+                            <option>Siege</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="unit-speed-tag" class="tag">Speed:</td>
+                    <td>
+                        <input id="unit-speed" class="numeric" type="number" min="0" max="20" step="0.25">
+                    </td>
+                    <td>  </td>
+                    <td id="unit-los-tag" class="tag">LOS:</td>
+                    <td>
+                        <input id="unit-los" class="numeric" type="number" min="0" max="100" step="1">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table id="unit-attacks">
+            <thead>
+                <tr>
+                    <th colspan="4">
+                        <h5>
+                            <span class="comment">Attack:</span>
+                            <span id="unit-main-attack"></span>
+                            <span class="comment" style="font-size: .75em; margin-left: 2em; position: relative;">(adjusted for multipliers, ROF and areal damage)
+                                <span class="tooltip-container"> ⓘ</span>
+                                <span class="info-tooltip">
+                                    <p>Average damage weighted for most popular enemies and adjusted for a rate of fire of 3.</p>
+                                    It is calculated according to:
+                                    <ul style="list-style-type: disc; padding-left: 1.0em; margin-bottom: 0;">
+                                        <li>whether there is a multiplier against an enemy;</li>
+                                        <li>whether this unit deals areal damage;</li>
+                                        <li>what type of unit the enemy is (i. e. melee, ranged, building etc.);</li>
+                                        <li>how often it might be faced.</li>
+                                    </ul>
+                                </span>
+                            </span>
+                        </h5>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <span style="width: auto;">
+                            <span class="tag">Specialization:</span>
+                            <span id="unit-specialization" class="numeric" style="width: auto; padding: 0.5em;"></span>
+                            <span class="comment" style="position: relative;">
+                                <span class="tooltip-container"> ⓘ</span>
+                                <span class="info-tooltip">
+                                    An index showing the divergence of the unit's attacks against different types of enemies. Based on the statistical variance of the unit's multipliers.
+                                </span>
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+                <tr id="unit-ranged">
+                    <td>
+                        <span class="tag">Ranged:</span>
+                        <span>
+                            <input class="numeric" id="unit-ranged-attack" type="number" min="0" step="1">
+                            <span> / </span>
+                            <input class="numeric" id="unit-ranged-rof" type="number" min="0.5" step="0.5">
+                        </span>
+                    </td>
+                    <td class="area-damage">
+                        <span class="comment">area: </span><input class="numeric unit-damagearea" type="number" min="0" max="10" step="0.5">
+                        <span class="comment">  cap: </span><input class="numeric unit-damagecap" type="number" min="0" step="10">
+                    </td>
+                    <td class="attack-range">
+                        <span class="comment" style="opacity: 70%;">range: </span><input class="numeric unit-range" type="number" min="0">
+                    </td>
+                    <td>
+                        <ul class="damage-bonuses"></ul>
+                    </td>
+                </tr>
+                <tr id="unit-melee">
+                    <td>
+                        <span class="tag">Melee:</span>
+                        <span>
+                            <input class="numeric" id="unit-melee-attack" type="number" min="0" step="1">
+                            <span> / </span>
+                            <input class="numeric" id="unit-melee-rof" type="number" min="0.5" step="0.5">
+                        </span>
+                    </td>
+                    <td class="area-damage">
+                        <span class="comment">area: </span><input class="numeric unit-damagearea" type="number" min="0" max="10" step="0.5">
+                        <span class="comment">  cap: </span><input class="numeric unit-damagecap" type="number" min="0" step="10">
+                    </td>
+                    <td class="attack-range">
+                        <span class="comment" style="opacity: 70%;">range: </span><input class="numeric unit-range" type="number" min="0">
+                    </td>
+                    <td>
+                        <ul class="damage-bonuses"></ul>
+                    </td>
+                </tr>
+                <tr id="unit-siege">
+                    <td>
+                        <span class="tag">Siege:</span>
+                        <span>
+                            <input class="numeric" id="unit-siege-attack" type="number" min="0" step="1">
+                            <span> / </span>
+                            <input class="numeric" id="unit-siege-rof" type="number" min="0.5" step="0.5">
+                        </span>
+                    </td>
+                    <td class="area-damage">
+                        <span class="comment">area: </span><input class="numeric unit-damagearea" type="number" min="0" max="10" step="0.5">
+                        <span class="comment">  cap: </span><input class="numeric unit-damagecap" type="number" min="0" step="10">
+                    </td>
+                    <td class="attack-range">
+                        <span class="comment" style="opacity: 70%;">range: </span><input class="numeric unit-range" type="number" min="0">
+                    </td>
+                    <td>
+                        <ul class="damage-bonuses"></ul>
+                    </td>
+                </tr>
+                <tr id="unit-cannon">
+                    <td>
+                        <span class="tag">Cannon:</span>
+                        <span>
+                            <input class="numeric" id="unit-cannon-attack" type="number" min="0" step="1">
+                            <span> / </span>
+                            <input class="numeric" id="unit-cannon-rof" type="number" min="0.5" step="0.5">
+                        </span>
+                    </td>
+                    <td class="area-damage">
+                        <span class="comment">area: </span><input class="numeric unit-damagearea" type="number" min="0" max="10" step="0.5">
+                        <span class="comment">  cap: </span><input class="numeric unit-damagecap" type="number" min="0" step="10">
+                    </td>
+                    <td class="attack-range">
+                        <span class="comment" style="opacity: 70%;">range: </span><input class="numeric unit-range" type="number" min="0">
+                    </td>
+                    <td>
+                        <ul class="damage-bonuses"></ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="unit-xml" class="xml">
+            <pre>
+                <code class="lang-xml" contenteditable="true"></code>
+            </pre>
+        </div>
+        <div id="unit-upgrades"></div>
+    </div>
+
+    <form id="base-unit-selection" style="display: none;" autocomplete="off" onsubmit="return loadUnit()">
+        <input list="units" name="units" id="select-base-unit" type="text" autocomplete="on" value="Musketeer">
+        <datalist id="units">
+        </datalist>
+        <input id="parse-button" type="submit" value="Copy">
+    </form>
+
+    <div id="settings-container">
+        <button id="settings-button">
+            <div class="icon">⚙</div>
+        </button>
+        <div id="settings">
+            <div>
+                <button id="settings-help">
+                    <div>
+                        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM11 7h2v2h-2V7zm0 4h2v6h-2v-6z"/>
+                        </svg>
+                    </div>
+                </button>
+                <button id="settings-theme">
+                    <div>
+                        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 2c5.522 0 10 3.978 10 8.889a5.558 5.558 0 0 1-5.556 5.555h-1.966c-.922 0-1.667.745-1.667 1.667 0 .422.167.811.422 1.1.267.3.434.689.434 1.122C13.667 21.256 12.9 22 12 22 6.478 22 2 17.522 2 12S6.478 2 12 2zm-1.189 16.111a3.664 3.664 0 0 1 3.667-3.667h1.966A3.558 3.558 0 0 0 20 10.89C20 7.139 16.468 4 12 4a8 8 0 0 0-.676 15.972 3.648 3.648 0 0 1-.513-1.86zM7.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM12 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                        </svg>
+                    </div>
+                </button>
+                <button id="settings-xml">
+                    <div>
+                        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M24 12l-5.657 5.657-1.414-1.414L21.172 12l-4.243-4.243 1.414-1.414L24 12zM2.828 12l4.243 4.243-1.414 1.414L0 12l5.657-5.657L7.07 7.757 2.828 12zm6.96 9H7.66l6.552-18h2.128L9.788 21z"/>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <button id="save-button">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M7 19v-6h10v6h2V7.828L16.172 5H5v14h2zM4 3h13l4 4v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm5 12v4h6v-4H9z"/>
+        </svg>
+    </button>
+
+    <div id="theme-selection-container" style="display: none;">
+        <div id="theme-selection">
+            <h2>
+                <span>Select a theme</span>
+            </h2>
+            <div id="theme-list">
+                <button class="theme-ayu-dark">
+                    <div class="theme-colors">
+                        <span class="color-1">●</span>
+                        <span class="color-2">●</span>
+                        <span class="color-3">●</span>
+                    </div>
+                    <div>
+                        <p>Ayu Dark</p>
+                    </div>
+                </button>
+                <button class="theme-light">
+                    <div class="theme-colors">
+                        <span class="color-1">●</span>
+                        <span class="color-2">●</span>
+                        <span class="color-3">●</span>
+                    </div>
+                    <div>
+                        <p>Blueberry Light</p>
+                    </div>
+                </li>
+                <button class="theme-monokai">
+                    <div class="theme-colors">
+                        <span class="color-1">●</span>
+                        <span class="color-2">●</span>
+                        <span class="color-3">●</span>
+                    </div>
+                    <div>
+                        <p>Monokai</p>
+                    </div>
+                </button>
+                <button class="theme-chrome">
+                    <div class="theme-colors">
+                        <span class="color-1">●</span>
+                        <span class="color-2">●</span>
+                        <span class="color-3">●</span>
+                    </div>
+                    <div>
+                        <p>Chrome</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="xml-settings-container" style="display: none;">
+        <div id="xml-settings">
+            <h2>
+                <span>XML settings</span>
+            </h2>
+            <span id="xml-editing" style="display: flex; justify-content: left;">
+                <label class="toggle" style="margin-top: 0.25rem;">
+                    <input id="xml-editing-switch" type="checkbox" name="xml-editing">
+                    <span class="slider"></span>
+                </label>
+                <span>Show XML</span>
+                <div>
+                    <span class="tooltip-container"> ⓘ</span>
+                    <span class="info-tooltip">
+                        Show the proto and techtree XML code in the editor
+                    </span>
+                </div>
+            </span>
+            <span id="live-xml" style="display: flex; justify-content: left;">
+                <label class="toggle" style="margin-top: 0.25rem;">
+                    <input id="live-xml-switch" type="checkbox" name="live-xml">
+                    <span class="slider"></span>
+                </label>
+                <span>Live editing</span>
+                <div>
+                    <span class="tooltip-container"> ⓘ</span>
+                    <span class="info-tooltip">
+                        Allow editing of a unit's XML source code straight in the editor
+                    </span>
+                </div>
+            </span>
+            <span id="new-first" style="display: flex; justify-content: left;">
+                <label class="toggle" style="margin-top: 0.25rem;">
+                    <input id="new-first-switch" type="checkbox" name="new-first">
+                    <span class="slider"></span>
+                </label>
+                <span>New entries first</span>
+                <div>
+                    <span class="tooltip-container"> ⓘ</span>
+                    <span class="info-tooltip">
+                        Add new units and techs to the beginning of the files rather than the end
+                    </span>
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div id="file-uploading">
+        <h5 id="file-message"><span class="comment">Select the /data files: </span>proto<span class="comment">, </span>techtree<span class="comment"> and </span>stringtable<span class="comment"></span></h5>
+        <input type="file" id="file-selector" accept=".xml" multiple>
+        <script type="text/javascript" src="static/js/main.js"> </script>
+    </div>
+  </body>
+</html>

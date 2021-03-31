@@ -1,0 +1,127 @@
+<unit id="$id$" name="$name$">
+    <dbid>$dbid$</dbid>
+    <displaynameid>$displaynameid$</displaynameid>
+    <editornameid>$editornameid$</editornameid>
+    <populationcount>1</populationcount>
+    <obstructionradiusx>0.4900</obstructionradiusx>
+    <obstructionradiusz>0.4900</obstructionradiusz>
+    <formationcategory>Ranged</formationcategory>
+    <maxvelocity>4.0000</maxvelocity>
+    <maxrunvelocity>6.0000</maxrunvelocity>
+    <movementtype>land</movementtype>
+    <turnrate>18.0000</turnrate>
+    <animfile>units\infantry_ranged\$unitname$\$unitname$.xml</animfile>
+    <impacttype>Flesh</impacttype>
+    <physicsinfo>dude</physicsinfo>
+    <icon>units\infantry_ranged\$unitname$\$unitname$_icon_128x128</icon>
+    <portraiticon>units\infantry_ranged\$unitname$\$unitname$_portrait</portraiticon>
+    <rollovertextid>$rollovertextid$</rollovertextid>
+    <shortrollovertextid>$shortrollovertextid$</shortrollovertextid>
+    <initialhitpoints>$hitpoints$</initialhitpoints>
+    <maxhitpoints>$hitpoints$</maxhitpoints>
+    <los>16.0000</los>
+    <projectileprotounit>InvisibleProjectile</projectileprotounit>
+    <unitaitype>RangedCombative</unitaitype>
+    <trainpoints>$trainpoints$</trainpoints>
+    <bounty>$bounty$</bounty>
+    <buildbounty>$bounty$</buildbounty>
+    <!--<cost resourcetype="Food">75.0000</cost>-->
+    <!--<cost resourcetype="Gold">25.0000</cost>-->
+    <allowedage>$allowedage$</allowedage>
+    <armor type="Hand" value="0.2000"/>
+    <unittype>LogicalTypeHealed</unittype>
+    <unittype>LogicalTypeValidSharpshoot</unittype>
+    <unittype>LogicalTypeNeededForVictory</unittype>
+    <unittype>LogicalTypeHandUnitsAutoAttack</unittype>
+    <unittype>LogicalTypeLandMilitary</unittype>
+    <unittype>LogicalTypeScout</unittype>
+    <unittype>LogicalTypeValidSPCUnitsDeadCondition</unittype>
+    <unittype>LogicalTypeGarrisonInShips</unittype>
+    <unittype>LogicalTypeRangedUnitsAutoAttack</unittype>
+    <unittype>LogicalTypeVillagersAttack</unittype>
+    <unittype>LogicalTypeHandUnitsAttack</unittype>
+    <unittype>LogicalTypeRangedUnitsAttack</unittype>
+    <unittype>LogicalTypeMinimapFilterMilitary</unittype>
+    <unittype>Unit</unittype>
+    <unittype>Military</unittype>
+    <unittype>UnitClass</unittype>
+    <unittype>AbstractInfantry</unittype>
+    <unittype>AbstractHeavyInfantry</unittype>
+    <unittype>HasBountyValue</unittype>
+    <unittype>AbstractGunpowderTrooper</unittype>
+    <unittype>Ranged</unittype>
+    <unittype>CountsTowardMilitaryScore</unittype>
+    <unittype>AbstractCavalryInfantry</unittype>
+    <unittype>ConvertsHerds</unittype>
+    <unittype>AbstractRangedInfantry</unittype>
+    <flag>CollidesWithProjectiles</flag>
+    <flag>ApplyHandicapTraining</flag>
+    <flag>CorpseDecays</flag>
+    <flag>ShowGarrisonButton</flag>
+    <flag>DontRotateObstruction</flag>
+    <flag>ObscuredByUnits</flag>
+    <flag>Tracked</flag>
+    <command page="10" column="1">Stop</command>
+    <command page="10" column="0">Garrison</command>
+    <command page="10" column="2">Delete</command>
+    <tactics>musketBayonet.tactics</tactics>
+    <protoaction>
+        <name>BuildingAttack</name>
+        <damage>$siegedamage$</damage>
+        <damagetype>Siege</damagetype>
+        <rof>3.000000</rof>
+    </protoaction>
+    <protoaction>
+        <name>DefendHandAttack</name>
+        <damage>$handattack$</damage>
+        <damagetype>Hand</damagetype>
+        <rof>1.500000</rof>
+        <damagebonus type="AbstractCavalry">3.000000</damagebonus>
+        <damagebonus type="AbstractLightInfantry">2.250000</damagebonus>
+    </protoaction>
+    <protoaction>
+        <name>DefendRangedAttack</name>
+        <damage>$rangedattack$</damage>
+        <damagetype>Ranged</damagetype>
+        <maxrange>12.000000</maxrange>
+        <rof>3.000000</rof>
+    </protoaction>
+    <protoaction>
+        <name>MeleeHandAttack</name>
+        <damage>$handattack$</damage>
+        <damagetype>Hand</damagetype>
+        <rof>1.500000</rof>
+        <damagebonus type="AbstractCavalry">3.000000</damagebonus>
+        <damagebonus type="AbstractLightInfantry">2.250000</damagebonus>
+    </protoaction>
+    <protoaction>
+        <name>StaggerHandAttack</name>
+        <damage>$handattack$</damage>
+        <damagetype>Hand</damagetype>
+        <rof>1.500000</rof>
+        <damagebonus type="AbstractCavalry">3.000000</damagebonus>
+        <damagebonus type="AbstractLightInfantry">2.250000</damagebonus>
+    </protoaction>
+    <protoaction>
+        <name>StaggerRangedAttack</name>
+        <damage>$rangedattack$</damage>
+        <damagetype>Ranged</damagetype>
+        <maxrange>12.000000</maxrange>
+        <rof>3.000000</rof>
+    </protoaction>
+    <protoaction>
+        <name>VolleyHandAttack</name>
+        <damage>$handattack$</damage>
+        <damagetype>Hand</damagetype>
+        <rof>1.500000</rof>
+        <damagebonus type="AbstractCavalry">3.000000</damagebonus>
+        <damagebonus type="AbstractLightInfantry">2.250000</damagebonus>
+    </protoaction>
+    <protoaction>
+        <name>VolleyRangedAttack</name>
+        <damage>$rangedattack$</damage>
+        <damagetype>Ranged</damagetype>
+        <maxrange>12.000000</maxrange>
+        <rof>3.000000</rof>
+    </protoaction>
+</unit>
